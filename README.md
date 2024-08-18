@@ -8,5 +8,5 @@ Setup
 -----
 1. Open the Xcode project file.
 2. Change in the file `AppDelegate.h` the `FOLDER` macro to the path used to create the VM’s files and load the ISO image.
-3. Change in the file `AppDelegate.h` the `ISOIMAGE` macro to the images’ file name.
+3. Change in the file `AppDelegate.h` the `ISOIMAGE` macro to the image file name.
 4. Select the menu item `Product > Run` to start the application.
