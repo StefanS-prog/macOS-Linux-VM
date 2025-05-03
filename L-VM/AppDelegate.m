@@ -6,14 +6,11 @@
 #import "AppDelegate.h"
 
 @interface AppDelegate ()
-
 @end
-
 
 @implementation AppDelegate {
     __strong IBOutlet NSWindow              *window;
     __weak IBOutlet VZVirtualMachineView    *virtualMachineView;
-    
     VZVirtualMachine                        *virtualMachine;
 }
 
@@ -32,8 +29,17 @@
     VZEFIBootLoader *bootloader = [[VZEFIBootLoader alloc] init];
     NSMutableArray *diskArray = [[NSMutableArray alloc] init];
     
-    NSURL *efiURL = [NSURL fileURLWithPath:FOLDER@"/efi_store"];   // path to EFI NVRAM file
-    NSURL *machineIdentifierURL = [NSURL fileURLWithPath:FOLDER@"/machine_identifier"];    // path to machine id file
+    NSURL *efiURL = [NSURL fileURLWithPath:FOLDER@"/efi_store"];    // path to EFI NVRAM file
+    NSURL *machineIdentifierURL = [NSURL fileURLWithPath:FOLDER@"/machine_identifier"]; // path to machine id file
+    NSURL *sharedFolderURL = [NSURL fileURLWithPath:FOLDER@"/"SHARED];  // path to shared folder
+    
+    if ([sharedFolderURL checkResourceIsReachableAndReturnError:nil]) {
+        VZSharedDirectory *sharedDirectory = [[VZSharedDirectory alloc] initWithURL:sharedFolderURL readOnly:NO];
+        VZSingleDirectoryShare *directoryShare = [[VZSingleDirectoryShare alloc] initWithDirectory:sharedDirectory];
+        VZVirtioFileSystemDeviceConfiguration *fileSystemDeviceConfiguration = [[VZVirtioFileSystemDeviceConfiguration alloc] initWithTag:SHARED];
+        [fileSystemDeviceConfiguration setShare:directoryShare];
+        [virtualMachineConfiguration setDirectorySharingDevices:@[fileSystemDeviceConfiguration]];
+    }
     
     BOOL needsInstall;
     needsInstall = ![efiURL checkResourceIsReachableAndReturnError:nil] || ![machineIdentifierURL checkResourceIsReachableAndReturnError:nil];
@@ -41,7 +47,7 @@
     if (needsInstall) {
         [bootloader setVariableStore:[[VZEFIVariableStore alloc] initCreatingVariableStoreAtURL:efiURL options:VZEFIVariableStoreInitializationOptionAllowOverwrite error:NULL]];
 
-        NSURL *installImageURL = [NSURL fileURLWithPath:FOLDER ISOIMAGE]; // path to ISO image
+        NSURL *installImageURL = [NSURL fileURLWithPath:FOLDER@"/"ISOIMAGE]; // path to ISO image
         VZDiskImageStorageDeviceAttachment *attachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:installImageURL readOnly:YES error:nil];
         VZUSBMassStorageDeviceConfiguration *usbDeviceConfiguration = [[VZUSBMassStorageDeviceConfiguration alloc] initWithAttachment:attachment];
         [diskArray addObject:usbDeviceConfiguration];
@@ -52,8 +58,8 @@
     } else {
         [bootloader setVariableStore:[[VZEFIVariableStore alloc] initWithURL:efiURL]];
         
-        NSData *machineRepresentation = [[NSData alloc] initWithContentsOfURL:machineIdentifierURL];
-        VZGenericMachineIdentifier *machineIdentifier = [[VZGenericMachineIdentifier alloc] initWithDataRepresentation:machineRepresentation];
+        NSData *machineIDRepresentation = [[NSData alloc] initWithContentsOfURL:machineIdentifierURL];
+        VZGenericMachineIdentifier *machineIdentifier = [[VZGenericMachineIdentifier alloc] initWithDataRepresentation:machineIDRepresentation];
         [platform setMachineIdentifier:machineIdentifier];
     }
     

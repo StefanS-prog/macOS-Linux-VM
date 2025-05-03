@@ -7,7 +7,8 @@
 #import <Virtualization/Virtualization.h>
 
 #define FOLDER      @"/Users/stefan/Documents"
-#define ISOIMAGE    @"ubuntu-24.04-live-server-arm64.iso"
+#define SHARED      @"shared-with-VM"
+#define ISOIMAGE    @"ubuntu-24.04.2-live-server-arm64.iso"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, VZVirtualMachineDelegate>
 
