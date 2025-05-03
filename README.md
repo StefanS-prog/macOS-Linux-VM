@@ -9,5 +9,7 @@ Setup
 1. Open the Xcode project file.
 2. Change in the file `AppDelegate.h` the `FOLDER` macro to the directory path used to create the VM’s files and to load the ISO image.
 3. Change in the file `AppDelegate.h` the `ISOIMAGE` macro to the ISO image file name.
-4. Create in the folder you have chosen a disk image file with the name `disk_image`. You can create eg. a 16 GiB disk image by typing `dd if=/dev/zero of=disk_image bs=1 count=1 seek=17179869183` in the folder. Verified file sizes are 16 GiB, 32 GiB, and 64 GiB. Arbitrary file sizes do not work.
-5. Select the menu item `Product > Run` to start the application.
+4. Change in the file `AppDelegate.h` the `SHARED` macro to the name of the directory you can share with the VM's Linux-based operating system.
+5. Create in the folder you have chosen a disk image file with the name `disk_image`. You can create eg. a 16 GiB disk image by typing `dd if=/dev/zero of=disk_image bs=1 count=1 seek=17179869183` after changing into the folder. Verified file sizes are 16 GiB, 32 GiB, and 64 GiB. Arbitrary file sizes do not work.
+6. Select the menu item `Product > Run` to start the application.
+7. To use the shared directory in the Linux-based operating system you must mount it there. You can use eg. `sudo mount -t virtiofs <SHARED macro value> <directory in Linux-based operating system to be shared>`.
