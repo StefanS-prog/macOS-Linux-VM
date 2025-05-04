@@ -47,7 +47,7 @@
     if (needsInstall) {
         [bootloader setVariableStore:[[VZEFIVariableStore alloc] initCreatingVariableStoreAtURL:efiURL options:VZEFIVariableStoreInitializationOptionAllowOverwrite error:NULL]];
 
-        NSURL *installImageURL = [NSURL fileURLWithPath:FOLDER@"/"ISOIMAGE]; // path to ISO image
+        NSURL *installImageURL = [NSURL fileURLWithPath:FOLDER@"/"ISOIMAGE];    // path to ISO image
         VZDiskImageStorageDeviceAttachment *attachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:installImageURL readOnly:YES error:nil];
         VZUSBMassStorageDeviceConfiguration *usbDeviceConfiguration = [[VZUSBMassStorageDeviceConfiguration alloc] initWithAttachment:attachment];
         [diskArray addObject:usbDeviceConfiguration];
@@ -69,7 +69,7 @@
     NSError *error;
    
     // The disk image cannot have any size. 16 GB, 32 GB, and 64 GB have been tested and work.
-    NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"];    // path to disk image
+    NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"]; // path to disk image
     VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL readOnly:NO error:&error];
     NSLog(@"StorageDeviceAttachment with error: %@", [error localizedDescription]);
     VZVirtioBlockDeviceConfiguration *mainDiskConfiguration = [[VZVirtioBlockDeviceConfiguration alloc] initWithAttachment:mainDiskAttachment];
@@ -162,6 +162,16 @@
     [virtualMachine restoreMachineStateFromURL:vmStateURL completionHandler:^(NSError *error) {
         NSLog(@"Restore attempt with error: %@", [error localizedDescription]);
     }];
+}
+
+- (IBAction)showAppInfo:sender {
+    NSDictionary *optionsDict = @{
+        NSAboutPanelOptionApplicationName: @"Linux-VM",
+        NSAboutPanelOptionApplicationVersion: @"1.1",
+        NSAboutPanelOptionVersion: @"1",
+        @"Copyright": @"Copyright © 2024, 2025 Stefan Schumann"
+    };
+    [NSApp orderFrontStandardAboutPanelWithOptions:optionsDict];
 }
 
 @end

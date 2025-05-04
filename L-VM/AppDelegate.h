@@ -18,5 +18,6 @@
 - (IBAction)resumeVM:sender;
 - (IBAction)saveVM:sender;
 - (IBAction)restoreVM:sender;
+- (IBAction)showAppInfo:sender;
 
 @end
