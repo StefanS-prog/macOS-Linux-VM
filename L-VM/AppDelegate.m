@@ -109,7 +109,6 @@
 
 - (void)guestDidStopVirtualMachine:(VZVirtualMachine *)virtualMachine {
     NSLog(@"Guest has stopped virtual machine");
-    [NSApp terminate:self];
 }
 
 - (void)virtualMachine:(VZVirtualMachine *)virtualMachine didStopWithError:(NSError *)error {
