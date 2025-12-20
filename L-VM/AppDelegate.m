@@ -17,7 +17,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     VZVirtualMachineConfiguration *virtualMachineConfiguration = [[VZVirtualMachineConfiguration alloc] init];
     [virtualMachineConfiguration setCPUCount:4];
-    [virtualMachineConfiguration setMemorySize:(uint64_t)4 * 1024 * 1024 * 1024];
+    [virtualMachineConfiguration setMemorySize:(uint64_t)8 * 1024 * 1024 * 1024];
     [virtualMachineConfiguration setKeyboards:@[[[VZUSBKeyboardConfiguration alloc] init]]];
     [virtualMachineConfiguration setPointingDevices:@[[[VZUSBScreenCoordinatePointingDeviceConfiguration alloc] init]]];
    
@@ -68,9 +68,13 @@
     
     NSError *error;
    
-    // The disk image cannot have any size. 16 GB, 32 GB, and 64 GB have been tested and work.
+    // The disk image cannot have any size. 16 GiB, 32 GiB, and 64 GiB have been tested and work.
     NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"]; // path to disk image
-    VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL readOnly:NO error:&error];
+    VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL
+        readOnly:NO
+        cachingMode:VZDiskImageCachingModeAutomatic
+        synchronizationMode:VZDiskImageSynchronizationModeFsync // can be set to VZDiskImageSynchronizationModeFull
+        error:&error];
     NSLog(@"StorageDeviceAttachment with error: %@", [error localizedDescription]);
     VZVirtioBlockDeviceConfiguration *mainDiskConfiguration = [[VZVirtioBlockDeviceConfiguration alloc] initWithAttachment:mainDiskAttachment];
     
