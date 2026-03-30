@@ -72,8 +72,8 @@
     NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"]; // path to disk image
     VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL
         readOnly:NO
-        cachingMode:VZDiskImageCachingModeAutomatic
-        synchronizationMode:VZDiskImageSynchronizationModeFsync // can be set to VZDiskImageSynchronizationModeFull
+        cachingMode:VZDiskImageCachingModeUncached  // caching is disabled due to possible disk image corruption
+        synchronizationMode:VZDiskImageSynchronizationModeFull
         error:&error];
     NSLog(@"StorageDeviceAttachment with error: %@", [error localizedDescription]);
     VZVirtioBlockDeviceConfiguration *mainDiskConfiguration = [[VZVirtioBlockDeviceConfiguration alloc] initWithAttachment:mainDiskAttachment];
@@ -108,7 +108,7 @@
 }
 
 - (BOOL)applicationSupportsSecureRestorableState:(NSApplication *)app {
-    return YES;
+    return NO;
 }
 
 - (void)guestDidStopVirtualMachine:(VZVirtualMachine *)virtualMachine {
@@ -172,7 +172,7 @@
         NSAboutPanelOptionApplicationName: @"Linux-VM",
         NSAboutPanelOptionApplicationVersion: @"1.1",
         NSAboutPanelOptionVersion: @"1",
-        @"Copyright": @"Copyright © 2024, 2025 Stefan Schumann"
+        @"Copyright": @"Copyright © 2024, 2025, 2026 Stefan Schumann"
     };
     [NSApp orderFrontStandardAboutPanelWithOptions:optionsDict];
 }
