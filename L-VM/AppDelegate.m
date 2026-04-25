@@ -16,7 +16,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     VZVirtualMachineConfiguration *virtualMachineConfiguration = [[VZVirtualMachineConfiguration alloc] init];
-    [virtualMachineConfiguration setCPUCount:4];
+    [virtualMachineConfiguration setCPUCount:6];
     [virtualMachineConfiguration setMemorySize:(uint64_t)8 * 1024 * 1024 * 1024];
     [virtualMachineConfiguration setKeyboards:@[[[VZUSBKeyboardConfiguration alloc] init]]];
     [virtualMachineConfiguration setPointingDevices:@[[[VZUSBScreenCoordinatePointingDeviceConfiguration alloc] init]]];
@@ -31,15 +31,36 @@
     
     NSURL *efiURL = [NSURL fileURLWithPath:FOLDER@"/efi_store"];    // path to EFI NVRAM file
     NSURL *machineIdentifierURL = [NSURL fileURLWithPath:FOLDER@"/machine_identifier"]; // path to machine id file
-    NSURL *sharedFolderURL = [NSURL fileURLWithPath:FOLDER@"/"SHARED];  // path to shared folder
+    NSURL *sharedFolderURL = [NSURL fileURLWithPath:FOLDER@"/"SHARED];  // path to shared folder in macOS
+    NSMutableArray *sharingDevicesArray = [[NSMutableArray alloc] init];
     
     if ([sharedFolderURL checkResourceIsReachableAndReturnError:nil]) {
         VZSharedDirectory *sharedDirectory = [[VZSharedDirectory alloc] initWithURL:sharedFolderURL readOnly:NO];
         VZSingleDirectoryShare *directoryShare = [[VZSingleDirectoryShare alloc] initWithDirectory:sharedDirectory];
-        VZVirtioFileSystemDeviceConfiguration *fileSystemDeviceConfiguration = [[VZVirtioFileSystemDeviceConfiguration alloc] initWithTag:SHARED];
-        [fileSystemDeviceConfiguration setShare:directoryShare];
-        [virtualMachineConfiguration setDirectorySharingDevices:@[fileSystemDeviceConfiguration]];
+        VZVirtioFileSystemDeviceConfiguration *fileSystemDeviceConfigurationShared = [[VZVirtioFileSystemDeviceConfiguration alloc] initWithTag:SHARED];
+        [fileSystemDeviceConfigurationShared setShare:directoryShare];
+        [sharingDevicesArray addObject:fileSystemDeviceConfigurationShared];
     }
+    
+    NSString *rosettaTag = @"RosettaTag";
+    NSError *validateError;
+    BOOL validationResult = [VZVirtioFileSystemDeviceConfiguration validateTag:rosettaTag error:&validateError];    // Optional
+    NSLog(@"Rosetta tag validation with error: %@", [validateError localizedDescription]);
+    
+    NSError *error;
+    if (validationResult) {
+        VZVirtioFileSystemDeviceConfiguration *fileSystemDeviceConfigurationRosetta = [[VZVirtioFileSystemDeviceConfiguration alloc] initWithTag:rosettaTag];
+        
+        VZLinuxRosettaDirectoryShare *rosettaDirectoryShare = [[VZLinuxRosettaDirectoryShare alloc] initWithError:&error];
+        NSLog(@"Rosetta share creation with error: %@", [error localizedDescription]);
+        if (rosettaDirectoryShare) {
+            [fileSystemDeviceConfigurationRosetta setShare:rosettaDirectoryShare];
+            [sharingDevicesArray addObject:fileSystemDeviceConfigurationRosetta];
+        }
+    }
+
+    if ([sharingDevicesArray count])
+        [virtualMachineConfiguration setDirectorySharingDevices:sharingDevicesArray];
     
     BOOL needsInstall;
     needsInstall = ![efiURL checkResourceIsReachableAndReturnError:nil] || ![machineIdentifierURL checkResourceIsReachableAndReturnError:nil];
@@ -65,9 +86,7 @@
     
     [virtualMachineConfiguration setBootLoader:bootloader];
     [virtualMachineConfiguration setPlatform:platform];
-    
-    NSError *error;
-   
+
     // The disk image cannot have any size. 16 GiB, 32 GiB, and 64 GiB have been tested and work.
     NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"]; // path to disk image
     VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL
@@ -178,3 +197,4 @@
 }
 
 @end
+
