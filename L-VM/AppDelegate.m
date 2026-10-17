@@ -91,7 +91,7 @@
     NSURL *mainDiskImageURL = [NSURL fileURLWithPath:FOLDER@"/disk_image"]; // path to disk image
     VZDiskImageStorageDeviceAttachment *mainDiskAttachment = [[VZDiskImageStorageDeviceAttachment alloc] initWithURL:mainDiskImageURL
         readOnly:NO
-        cachingMode:VZDiskImageCachingModeUncached  // caching is disabled due to possible disk image corruption
+        cachingMode:VZDiskImageCachingModeCached        // Disable if disk image corruption is an issue
         synchronizationMode:VZDiskImageSynchronizationModeFull
         error:&error];
     NSLog(@"StorageDeviceAttachment with error: %@", [error localizedDescription]);
@@ -109,7 +109,16 @@
     VZVirtioSoundDeviceConfiguration *outputSoundDeviceConfiguration = [[VZVirtioSoundDeviceConfiguration alloc] init];
     [outputSoundDeviceConfiguration setStreams:@[outputStream]];
     [virtualMachineConfiguration setAudioDevices:@[outputSoundDeviceConfiguration]];
-    
+
+    VZSpiceAgentPortAttachment *spiceAttachment = [[VZSpiceAgentPortAttachment alloc] init];
+    [spiceAttachment setSharesClipboard:YES];
+    VZVirtioConsolePortConfiguration *spiceAgentPort = [[VZVirtioConsolePortConfiguration alloc] init];
+    [spiceAgentPort setAttachment:spiceAttachment];
+    [spiceAgentPort setName:[VZSpiceAgentPortAttachment spiceAgentPortName]];
+    VZVirtioConsoleDeviceConfiguration *consoleConfiguration = [[VZVirtioConsoleDeviceConfiguration alloc] init];
+    [[consoleConfiguration ports] setObject:spiceAgentPort atIndexedSubscript:0];
+    [virtualMachineConfiguration setConsoleDevices:@[consoleConfiguration]];
+
     [virtualMachineConfiguration validateWithError:&error];
     NSLog(@"Validation with error: %@", [error localizedDescription]);
     
