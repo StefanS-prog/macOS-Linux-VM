@@ -8,7 +8,7 @@
 
 #define FOLDER      @"/Users/stefan/Documents"
 #define SHARED      @"shared-with-VM"
-#define ISOIMAGE    @"ubuntu-24.04.2-live-server-arm64.iso"
+#define ISOIMAGE    @"AlmaLinux-10.2-aarch64-dvd.iso"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, VZVirtualMachineDelegate>
 
